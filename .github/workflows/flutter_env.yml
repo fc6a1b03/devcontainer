@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       flutter-version:
-        description: 'Flutter stable version (x.y.z) | 3.x | 3.24.5'
+        description: 'Flutter stable version (x.y.z)'
         required: true
-        default: '3.x'
+        default: '3.35.4'
 
 env:
   REGISTRY: ghcr.io

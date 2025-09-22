@@ -48,8 +48,28 @@ jobs:
             type=raw,value=${{ inputs.flutter-version }}
             type=raw,value=latest,enable={{is_default_branch}}
       - uses: docker/setup-buildx-action@v3
+      - name: Write Dockerfile
+        run: |
+          cat <<'EOF' > Dockerfile
+          ARG UBUNTU_VERSION=22.04
+          FROM ubuntu:${UBUNTU_VERSION}
+          ENV DEBIAN_FRONTEND=noninteractive
+          ENV JAVA_HOME=/opt/java/17
+          ENV FLUTTER_ROOT=/opt/flutter
+          ENV PATH=$JAVA_HOME/bin:$FLUTTER_ROOT/bin:$PATH
+
+          RUN apt-get update && apt-get install -y --no-install-recommends \
+              curl git zip unzip xz-utils nano && rm -rf /var/lib/apt/lists/*
+
+          COPY --from=0 /opt/hostedtoolcache/Java_Temurin_jdk/17*  /opt/java/17
+          COPY --from=0 /opt/hostedtoolcache/flutter/${{ inputs.flutter-version }}*  /opt/flutter
+
+          WORKDIR /workspace
+          CMD ["bash"]
+          EOF
       - uses: docker/build-push-action@v5
         with:
+          context: .
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -57,18 +77,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             UBUNTU_VERSION=${{ steps.ubuntu.outputs.version }}
-          file-inline: |
-            ARG UBUNTU_VERSION=22.04
-            FROM ubuntu:${UBUNTU_VERSION}
-            ENV DEBIAN_FRONTEND=noninteractive
-            ENV JAVA_HOME=/opt/java/17
-            ENV FLUTTER_ROOT=/opt/flutter
-            ENV PATH=$JAVA_HOME/bin:$FLUTTER_ROOT/bin:$PATH
-
-            RUN apt-get update && apt-get install -y --no-install-recommends \
-                curl git zip unzip xz-utils nano && rm -rf /var/lib/apt/lists/*
-            COPY --from=0 /opt/hostedtoolcache/Java_Temurin_jdk/17*  /opt/java/17
-            COPY --from=0 /opt/hostedtoolcache/flutter/${{ inputs.flutter-version }}*  /opt/flutter
-
-            WORKDIR /workspace
-            CMD ["bash"]

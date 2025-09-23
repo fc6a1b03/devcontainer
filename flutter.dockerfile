@@ -8,7 +8,7 @@ ENV PATH=/usr/local/bin:/usr/bin:/bin:$PATH
 # 最小系统依赖
 RUN dnf -y update && \
     dnf -y install --setopt=install_weak_deps=False \
-        java-17-openjdk-devel git unzip which sudo nano openssh-server \
+        java-17-openjdk-devel git unzip which sudo nano \
         # Chrome 依赖
         atk cups-libs gtk3 libXcomposite libXcursor libXdamage \
         libXrandr mesa-libgbm pango alsa-lib && \
@@ -19,24 +19,12 @@ RUN groupadd -g ${GID} ${USER} && \
     useradd -m -u ${UID} -g ${GID} -G wheel -s /bin/bash ${USER} && \
     echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-#---- SSH无密码登录 ----
-USER root
-RUN dnf -y install openssh-server && \
-    ssh-keygen -A && \
-    sed -i -E \
-        -e 's/^#?PermitEmptyPasswords no/PermitEmptyPasswords yes/' \
-        -e 's/^#?PasswordAuthentication yes/PasswordAuthentication yes/' \
-        -e 's/^#?UsePAM yes/UsePAM no/' \
-        -e 's/^#?PermitRootLogin .*/PermitRootLogin no/' \
-        /etc/ssh/sshd_config && \
-    passwd -d developer
-
 #---- Android SDK（latest） ----
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools
 USER root
 RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
-    curl -fsSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o /tmp/cmd.zip && \
+    curl -fsSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip  -o /tmp/cmd.zip && \
     unzip -q /tmp/cmd.zip -d /tmp && \
     mv /tmp/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/latest && \
     rm /tmp/cmd.zip && \
@@ -62,8 +50,8 @@ RUN set -e && \
 
 #---- Chrome（Web 调试） ----
 USER root
-RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/pki/rpm-gpg/RPM-GPG-KEY-google && \
-    echo -e "[google-chrome]\nname=google-chrome\nbaseurl=http://dl.google.com/linux/chrome/rpm/stable/\$basearch\nenabled=1\ngpgcheck=1\ngpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-google" \
+RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub  | gpg --dearmor -o /etc/pki/rpm-gpg/RPM-GPG-KEY-google && \
+    echo -e "[google-chrome]\nname=google-chrome\nbaseurl=http://dl.google.com/linux/chrome/rpm/stable/ \$basearch\nenabled=1\ngpgcheck=1\ngpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-google" \
     > /etc/yum.repos.d/google-chrome.repo && \
     dnf -y install google-chrome-stable && \
     dnf clean all
@@ -73,7 +61,7 @@ USER ${USER}
 ENV FVM_ROOT=/home/${USER}/fvm
 ENV PATH=$FVM_ROOT/default/bin:$PATH
 USER root
-RUN curl -fsSL https://fvm.app/install.sh | FVM_ALLOW_ROOT=true bash && \
+RUN curl -fsSL https://fvm.app/install.sh  | FVM_ALLOW_ROOT=true bash && \
     mv /root/.fvm_flutter /opt/fvm && ln -sf /opt/fvm/bin/fvm /usr/bin/fvm && \
     chmod -R 755 /opt/fvm && rm -f /usr/local/bin/fvm
 USER ${USER}
@@ -89,4 +77,4 @@ ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV FVM_ROOT=/home/${USER}/fvm
 ENV PATH=${PATH}:${FVM_ROOT}/default/bin:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools
 
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/bin/bash"]

@@ -57,6 +57,7 @@ RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor
 USER ${USER}
 
 #---- FVM + Flutter stable ----
+ENV PATH=/usr/local/bin:$PATH
 ENV FVM_ROOT=/home/${USER}/fvm
 USER root
 RUN curl -fsSL https://fvm.app/install.sh | FVM_ALLOW_ROOT=true bash

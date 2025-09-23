@@ -3,7 +3,7 @@ FROM almalinux:9 AS base
 ARG USER=developer
 ARG UID=1000
 ARG GID=1000
-ENV PATH=/usr/local/bin:$PATH
+ENV PATH=/usr/local/bin:/usr/bin:/bin:$PATH
 
 # 最小系统依赖
 RUN dnf -y update && \
@@ -59,6 +59,7 @@ USER ${USER}
 
 #---- FVM + Flutter stable ----
 ENV FVM_ROOT=/home/${USER}/fvm
+ENV PATH=$FVM_ROOT/default/bin:$PATH
 USER root
 RUN curl -fsSL https://fvm.app/install.sh | FVM_ALLOW_ROOT=true bash && \
     mv /root/.fvm_flutter /opt/fvm && ln -sf /opt/fvm/bin/fvm /usr/bin/fvm && \

@@ -30,12 +30,21 @@ RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
     chown -R ${USER}:${USER} ${ANDROID_SDK_ROOT}
 USER ${USER}
 # 默认最新稳定平台与 build-tools
-RUN yes | sdkmanager --licenses && \
-    API=$(sdkmanager --list | grep -oP 'platforms;android-\K[0-9]+$' | sort -n | tail -n1) && \
-    BUILD_TOOLS=$(sdkmanager --list | grep -oP 'build-tools;\K[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1) && \
+RUN set -e && \
+    yes | sdkmanager --licenses && \
+    API=$(sdkmanager --list 2>/dev/null | \
+          sed -n '/Available packages:/,$p' | \
+          grep -oE 'platforms;android-[0-9]+$' | \
+          grep -oE '[0-9]+$' | sort -n | tail -n1) && \
+    BUILD_TOOLS=$(sdkmanager --list 2>/dev/null | \
+                  sed -n '/Available packages:/,$p' | \
+                  grep -oE 'build-tools;[0-9]+\.[0-9]+\.[0-9]+' | \
+                  grep -oE '[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1) && \
+    [ -n "$API" ] && echo "Latest API  = $API"   || echo "Warning: no API found" && \
+    [ -n "$BUILD_TOOLS" ] && echo "Latest BT = $BUILD_TOOLS" || echo "Warning: no build-tools found" && \
     sdkmanager --install \
-        "platforms;android-${API}" \
-        "build-tools;${BUILD_TOOLS}" \
+        ${API:+"platforms;android-$API"} \
+        ${BUILD_TOOLS:+"build-tools;$BUILD_TOOLS"} \
         "platform-tools"
 
 #---- Chrome（Web 调试） ----

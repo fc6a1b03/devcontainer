@@ -34,15 +34,14 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable=true
-      - uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@v5
         with:
           push: true
           context: .
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          file: ./flutter.dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          file: ./flutter-mobile-web-latest.dockerfile
           build-args: |
             UBUNTU_VERSION=${{ steps.ubuntu.outputs.version }}

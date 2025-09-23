@@ -56,12 +56,13 @@ RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor
     dnf clean all
 USER ${USER}
 
-#---- FVM + Flutter 3 stable ----
+#---- FVM + Flutter stable ----
 ENV FVM_ROOT=/home/${USER}/fvm
-ENV PATH=${PATH}:${FVM_ROOT}/default/bin
 USER root
-RUN curl -fsSL https://github.com/leoafarias/fvm/releases/download/3.2.0/fvm-3.2.0-linux-x64.tar.gz | tar xz -C /tmp && \
-    mv /tmp/fvm /usr/local/bin/fvm && rm -rf /tmp/fvm*
+RUN curl -fsSL https://github.com/leoafarias/fvm/releases/download/3.2.0/fvm-3.2.0-linux-x64.tar.gz | \
+    tar xz -C /tmp && \
+    install -m 755 /tmp/fvm /usr/bin/fvm && \
+    rm -rf /tmp/fvm*
 USER ${USER}
 RUN fvm install stable && \
     fvm global stable && \

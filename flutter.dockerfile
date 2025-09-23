@@ -8,7 +8,7 @@ ENV PATH=/usr/local/bin:/usr/bin:/bin:$PATH
 # 最小系统依赖
 RUN dnf -y update && \
     dnf -y install --setopt=install_weak_deps=False \
-        java-17-openjdk-devel git unzip which sudo nano \
+        java-17-openjdk-devel git unzip which sudo nano openssh-server \
         # Chrome 依赖
         atk cups-libs gtk3 libXcomposite libXcursor libXdamage \
         libXrandr mesa-libgbm pango alsa-lib && \
@@ -18,6 +18,18 @@ RUN dnf -y update && \
 RUN groupadd -g ${GID} ${USER} && \
     useradd -m -u ${UID} -g ${GID} -G wheel -s /bin/bash ${USER} && \
     echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+#---- SSH无密码登录 ----
+USER root
+RUN dnf -y install openssh-server && \
+    ssh-keygen -A && \
+    sed -i -E \
+        -e 's/^#?PermitEmptyPasswords no/PermitEmptyPasswords yes/' \
+        -e 's/^#?PasswordAuthentication yes/PasswordAuthentication yes/' \
+        -e 's/^#?UsePAM yes/UsePAM no/' \
+        -e 's/^#?PermitRootLogin .*/PermitRootLogin no/' \
+        /etc/ssh/sshd_config && \
+    passwd -d developer
 
 #---- Android SDK（latest） ----
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
@@ -76,4 +88,5 @@ WORKDIR /home/${USER}
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV FVM_ROOT=/home/${USER}/fvm
 ENV PATH=${PATH}:${FVM_ROOT}/default/bin:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools
-CMD ["/bin/bash"]
+
+CMD ["/usr/sbin/sshd", "-D"]

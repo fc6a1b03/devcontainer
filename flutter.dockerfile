@@ -7,7 +7,7 @@ ARG GID=1000
 # 最小系统依赖
 RUN dnf -y update && \
     dnf -y install --setopt=install_weak_deps=False \
-        java-17-openjdk-devel git curl unzip which sudo nano \
+        java-17-openjdk-devel git unzip which sudo nano \
         # Chrome 依赖
         atk cups-libs gtk3 libXcomposite libXcursor libXdamage \
         libXrandr mesa-libgbm pango alsa-lib && \

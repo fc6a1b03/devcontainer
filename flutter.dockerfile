@@ -60,7 +60,10 @@ USER ${USER}
 #---- FVM + Flutter stable ----
 ENV FVM_ROOT=/home/${USER}/fvm
 USER root
-RUN curl -fsSL https://fvm.app/install.sh | FVM_ALLOW_ROOT=true bash
+RUN curl -fsSL https://fvm.app/install.sh | FVM_ALLOW_ROOT=true bash && \
+    cp /root/.fvm_flutter/bin/fvm /usr/bin/fvm && \
+    chmod 755 /usr/bin/fvm && \
+    rm -rf /root/.fvm_flutter /usr/local/bin/fvm
 USER ${USER}
 RUN fvm install stable && \
     fvm global stable && \

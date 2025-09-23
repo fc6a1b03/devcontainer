@@ -18,7 +18,7 @@ RUN groupadd -g ${GID} ${USER} && \
     useradd -m -u ${UID} -g ${GID} -G wheel -s /bin/bash ${USER} && \
     echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-#---- Android SDK（latest 稳定版） ----
+#---- Android SDK（latest） ----
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools
 USER root
@@ -29,11 +29,13 @@ RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
     rm /tmp/cmd.zip && \
     chown -R ${USER}:${USER} ${ANDROID_SDK_ROOT}
 USER ${USER}
-# 关键：使用 latest 关键字，永远装当前最新稳定平台与 build-tools
+# 默认最新稳定平台与 build-tools
 RUN yes | sdkmanager --licenses && \
+    API=$(sdkmanager --list | grep -oP 'platforms;android-\K[0-9]+$' | sort -n | tail -n1) && \
+    BUILD_TOOLS=$(sdkmanager --list | grep -oP 'build-tools;\K[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1) && \
     sdkmanager --install \
-        "platforms;android-latest" \
-        "build-tools;latest" \
+        "platforms;android-${API}" \
+        "build-tools;${BUILD_TOOLS}" \
         "platform-tools"
 
 #---- Chrome（Web 调试） ----

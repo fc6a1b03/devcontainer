@@ -38,10 +38,7 @@ jobs:
         with:
           push: true
           context: .
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           file: ./flutter.dockerfile
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             UBUNTU_VERSION=${{ steps.ubuntu.outputs.version }}

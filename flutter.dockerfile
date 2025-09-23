@@ -59,10 +59,7 @@ USER ${USER}
 #---- FVM + Flutter stable ----
 ENV FVM_ROOT=/home/${USER}/fvm
 USER root
-RUN curl -fsSL https://github.com/leoafarias/fvm/releases/download/3.2.0/fvm-3.2.0-linux-x64.tar.gz | \
-    tar xz -C /tmp && \
-    install -m 755 /tmp/fvm /usr/bin/fvm && \
-    rm -rf /tmp/fvm*
+RUN curl -fsSL https://fvm.app/install.sh | bash
 USER ${USER}
 RUN fvm install stable && \
     fvm global stable && \
